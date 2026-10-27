@@ -1,0 +1,12 @@
+.git
+.firebase
+hosting
+app
+**/bin
+**/obj
+**/App_Data
+verification
+**/*.mp4
+**/*.onnx
+**/*.zip
+**/firebase-debug.log

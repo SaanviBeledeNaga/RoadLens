@@ -1,0 +1,13 @@
+bin/
+obj/
+app/
+App_Data/
+.vs/
+*.user
+
+# Downloaded at Docker build time; never upload model binaries or user footage to Git.
+src/VehicleCounter.Api/ModelsData/*.onnx
+src/VehicleCounter.Api/wwwroot/samples/*.mp4
+hosting/
+.firebase/
+firebase-debug.log

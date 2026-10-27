@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RoadLens — Vehicle detection & counting</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css"><script src="/config.js?v=5" defer></script><script src="/api.js?v=5" defer></script><script src="/activity.js?v=5" defer></script><script src="/review.js?v=5" defer></script><script src="/app.js?v=5" defer></script>
+</head>
+<body>
+<header>
+  <a class="brand" href="/" aria-label="RoadLens home"><span class="brand-mark">R</span>RoadLens<span class="brand-sub">TRAFFIC INTELLIGENCE</span></a>
+  <div class="connection"><span id="health-dot" class="dot"></span><span id="health-label">Connecting to backend</span></div>
+</header>
+<main>
+  <div class="page-heading"><div><div class="eyebrow">WORKSPACE / VIDEO ANALYSIS</div><h1>Every vehicle. <span>Accounted for.</span></h1><p>Turn road footage into vehicle counts. Set your line and let the video do the rest.</p></div><span class="version">LOCAL WORKSPACE <span>v1.0</span></span></div>
+  <div class="workspace">
+    <aside class="panel setup">
+      <div class="panel-title"><span>Analysis setup</span><span class="small-tag">01</span></div>
+      <form id="analysis-form">
+        <label class="field-title" for="video-input">Video source</label>
+        <label class="upload" id="drop-zone" for="video-input"><span class="upload-icon">↥</span><strong id="upload-title">Choose a traffic video</strong><span id="upload-detail">or drop your file here</span><small>MP4, MOV, AVI, MKV, WEBM · up to 500 MB</small></label>
+        <input id="video-input" type="file" accept="video/*,.mkv,.avi" class="visually-hidden">
+        <button type="button" class="sample-button" id="sample-button">Try sample traffic footage ↗</button><div id="file-info" class="file-info" hidden></div>
+        <div class="separator"></div>
+        <div class="label-row"><label class="field-title" for="confidence">Detection confidence</label><output id="confidence-value">25%</output></div>
+        <input id="confidence" type="range" min="10" max="95" value="25"><p class="helper">Start at 25%. Higher values can miss vehicles before they cross the line.</p>
+        <label class="field-title" for="stride">Processing interval</label>
+        <select id="stride"><option value="1">Every frame · best tracking</option><option value="2" selected>Every 2nd frame · balanced</option><option value="3">Every 3rd frame · faster</option></select>
+        <div class="separator"></div>
+        <div class="label-row"><span class="field-title">Counting line</span><button type="button" class="text-button" id="reset-line">Edit / reset</button></div>
+        <p class="helper line-help">Drag across the video to place a line. A vehicle is counted when the bottom center of its box crosses the line.</p>
+        <div class="line-key"><span></span>Bidirectional counting</div>
+        <button class="primary" id="start-button" type="submit" disabled>Analyze video <span>↗</span></button>
+        <button class="secondary" id="stop-button" type="button" hidden>Stop processing</button>
+        <p id="message" class="message" role="status" aria-live="polite">Choose a video to get started.</p>
+      </form>
+      <div class="setup-note"><span class="note-icon">◈</span><p>Processed on this computer.<br><span>Videos stay on this computer for vehicle review.</span></p></div>
+    </aside>
+    <section class="analysis-area">
+      <div class="stats-grid">
+        <div class="stat total"><div class="stat-label">TOTAL COUNTED <span>↗</span></div><div id="total" class="stat-number">0</div><div class="stat-note">Unique line crossings</div></div>
+        <div class="stat"><div class="stat-label">CARS</div><div id="count-car" class="stat-number">0</div><div class="stat-note"><i class="class-dot car"></i>Passenger vehicles</div></div>
+        <div class="stat"><div class="stat-label">MOTORCYCLES</div><div id="count-motorcycle" class="stat-number">0</div><div class="stat-note"><i class="class-dot motorcycle"></i>Two wheelers</div></div>
+        <div class="stat"><div class="stat-label">BUSES / TRUCKS</div><div id="count-heavy" class="stat-number">0</div><div class="stat-note"><i class="class-dot heavy"></i>Heavy vehicles</div></div>
+      </div>
+      <div class="panel video-panel">
+        <div class="panel-title"><div>Detection viewport <span id="video-name" class="muted">/ No source selected</span></div><span id="job-badge" class="badge">READY</span></div>
+        <div class="viewport" id="viewport">
+          <div class="empty-state" id="empty-state"><div class="scan-icon"><span></span></div><h2>Your next traffic insight starts here.</h2><p>Upload a video, position the counting line,<br>and start your analysis.</p><div class="supported"><span>CAR</span><span>MOTORCYCLE</span><span>BUS</span><span>TRUCK</span></div></div>
+          <div class="media-stage" id="media-stage" hidden>
+            <video id="source-video" muted playsinline preload="metadata"></video>
+            <canvas id="line-canvas" aria-label="Drag to draw the counting line" tabindex="0"></canvas>
+            <img id="processed-preview" alt="Processed video frame with vehicle detection boxes" hidden>
+            <div class="review-stage" id="review-stage" hidden>
+              <video id="review-video" controls playsinline preload="metadata" aria-label="Review the selected vehicle in the original video"></video>
+              <canvas id="review-canvas" aria-hidden="true"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="review-toolbar" id="review-toolbar" hidden>
+          <div><strong id="review-title">Vehicle review</strong><span id="review-status" role="status">Select a vehicle number.</span></div>
+          <div class="review-actions"><button type="button" id="review-first">First seen</button><button type="button" id="review-crossing">Crossing</button><button type="button" id="review-close">Back to analysis ×</button></div>
+        </div>
+        <div class="video-toolbar"><span id="time-label">00:00 / 00:00</span><div class="progress-track"><div id="progress-bar"></div></div><span id="progress-label">Waiting for video</span></div>
+        <div class="video-footer"><span><i class="legend-box"></i> Tracked vehicle</span><span><i class="legend-line"></i> Counting line</span><span class="fps" id="fps-label">— frames / sec</span></div>
+      </div>
+      <div class="bottom-grid">
+        <div class="panel direction-panel"><div class="panel-title">Direction breakdown<span class="small-tag">CROSSINGS</span></div><div class="direction-row"><span class="direction-icon">↘</span><div><strong>A → B</strong><small>Negative to positive side</small></div><b id="direction-a">0</b></div><div class="direction-row"><span class="direction-icon">↖</span><div><strong>B → A</strong><small>Positive to negative side</small></div><b id="direction-b">0</b></div></div>
+        <div class="panel events-panel">
+          <div class="panel-title">Vehicle activity<a id="export-button" class="text-button disabled" aria-disabled="true">Export all vehicles ↓</a></div>
+          <div class="activity-controls"><label for="activity-filter">Show <select id="activity-filter"><option value="all">All detected vehicles</option><option value="crossed">Crossed the line</option><option value="not-crossed">Not crossed</option></select></label><span id="activity-summary" role="status">0 tracked · 0 crossed</span></div>
+          <p class="activity-help" id="activity-help">Track numbers are in ascending order. Click a number to find and highlight that vehicle in the video.</p>
+          <div class="events-scroll"><table><thead><tr><th>TRACK</th><th>VEHICLE</th><th>STATUS</th><th>DIRECTION</th><th>FIRST SEEN</th><th>CROSSED AT</th></tr></thead><tbody id="events-body"><tr><td colspan="6" class="table-empty">Detected vehicles will appear here during analysis.</td></tr></tbody></table></div>
+          <div class="activity-pagination"><button type="button" id="activity-prev" disabled>← Previous</button><span id="activity-page">0 vehicles</span><button type="button" id="activity-next" disabled>Next →</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer><span><span class="footer-mark">R</span> ROADLENS / VEHICLE ANALYTICS</span><span>C# backend · ONNX detection · Local processing</span></footer>
+</main>
+</body>
+</html>
+
+
+

@@ -1,0 +1,5 @@
+Sample video: person-bicycle-car-detection.mp4 by Intel IoT DevKit.
+Source: https://github.com/intel-iot-devkit/sample-videos/blob/master/person-bicycle-car-detection.mp4
+License: Creative Commons Attribution 4.0 International (CC BY 4.0).
+https://creativecommons.org/licenses/by/4.0/
+The file is included without modification. License text is in LICENSE.txt.

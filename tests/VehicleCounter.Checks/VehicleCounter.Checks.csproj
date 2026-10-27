@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/VehicleCounter.Api/Models/AnalysisModels.cs" Link="AnalysisModels.cs" />
+    <Compile Include="../../src/VehicleCounter.Api/Services/VehicleTracker.cs" Link="VehicleTracker.cs" />
+  </ItemGroup>
+  <ItemGroup><Content Include="Fixtures/*.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+</Project>
+
+

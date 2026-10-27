@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {boxAtTime,scaleBox}=require('../src/VehicleCounter.Api/wwwroot/review.js');
+const observations=[{sourceFrame:30,videoSeconds:1,box:{x:100,y:200,width:50,height:80}},{sourceFrame:32,videoSeconds:1+2/30,box:{x:110,y:210,width:60,height:90}}];
+assert.deepEqual(boxAtTime(observations,1),observations[0].box);
+assert.deepEqual(boxAtTime(observations,1+2/30),observations[1].box);
+const middle=boxAtTime(observations,1+1/30);
+assert(Math.abs(middle.x-105)<1e-6 && Math.abs(middle.width-55)<1e-6);
+assert.equal(boxAtTime(observations,0.5),null);
+assert.equal(boxAtTime(observations,2),null);
+assert.equal(boxAtTime([{...observations[0]},{...observations[1],videoSeconds:3}],2),null);
+assert.equal(boxAtTime([],1),null);
+assert.deepEqual(scaleBox({x:100,y:200,width:50,height:80},1920,1080,960,540),{x:50,y:100,width:25,height:40});
+console.log('PASS: Exact-frame highlighting, interpolation, no highlights during gaps, and display scaling');
