@@ -12,9 +12,10 @@ RUN mkdir -p src/VehicleCounter.Api/ModelsData src/VehicleCounter.Api/wwwroot/sa
     && echo '452b11b7e0efbd019f1d9570d0c790e90416ad4ad29eec6003872d08443140ef  src/VehicleCounter.Api/wwwroot/samples/traffic.mp4' | sha256sum -c -
 RUN dotnet publish src/VehicleCounter.Api/VehicleCounter.Api.csproj -c Release -r linux-x64 --self-contained false --no-restore -o /out
 
+
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends libgtk-3-0 libgomp1 ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libgtk-3-0 libgomp1 libdrm2 libgbm1 libva2 libva-drm2 libva-x11-2 libvdpau1 ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /out/ ./
 ENV DOTNET_gcServer=0 DOTNET_GCHeapHardLimit=0x0C000000 ASPNETCORE_HTTP_PORTS=10000 AllowedHosts=*
@@ -24,4 +25,6 @@ USER app
 ENV Storage__DataDirectory=/tmp/roadlens-data
 EXPOSE 10000
 ENTRYPOINT ["dotnet", "VehicleCounter.Api.dll"]
+
+
 
