@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 from urllib.parse import urlsplit
 
+
 parser=argparse.ArgumentParser()
 parser.add_argument('--api-url',required=True)
 args=parser.parse_args()
@@ -16,4 +17,10 @@ source=root/'src'/'VehicleCounter.Api'/'wwwroot'
 target=root/'hosting'
 shutil.copytree(source,target,dirs_exist_ok=True)
 (target/'config.js').write_text('window.ROADLENS_CONFIG = Object.freeze('+json.dumps({'apiBaseUrl':url})+');\n',encoding='utf-8')
+index=target/'index.html'
+html=index.read_text(encoding='utf-8')
+html=html.replace('LOCAL WORKSPACE', 'HOSTED WORKSPACE')
+html=html.replace('Processed on this computer.<br><span>Videos stay on this computer for vehicle review.</span>', 'Processed on the RoadLens server.<br><span>Uploads are temporary and may be removed when the server restarts.</span>')
+index.write_text(html,encoding='utf-8')
 print('Firebase Hosting directory is ready; only static dashboard files are included.')
+
